@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZEE DOWNLOAD — YouTube Video &amp; MP3 Downloader</title>
+  <meta name="description" content="ZEE DOWNLOAD — download YouTube videos in HD (up to 1080p) or extract MP3 audio up to 320kbps. Fast, clean, and free." />
+  <meta property="og:title" content="ZEE DOWNLOAD" />
+  <meta property="og:description" content="YouTube video & MP3 downloader. HD video and high-quality audio in seconds." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <style>
+/* ============ Reset & Base ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:#0f1115;
+  background:#f4f6fb;
+  min-height:100vh;
+  overflow-x:hidden;
+  line-height:1.5;
+}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ============ Theme tokens ============ */
+:root{
+  --purple-600:#7c3aed;
+  --purple-500:#8b5cf6;
+  --purple-400:#a855f7;
+  --purple-700:#6d28d9;
+  --ink:#0f1115;
+  --ink-2:#2a1f3d;
+}
+
+/* ============ Ambient Background ============ */
+.bg-orbs{
+  position:fixed;inset:0;z-index:-1;overflow:hidden;
+  background:
+    radial-gradient(1200px 800px at 10% -10%, #efeafe 0%, transparent 60%),
+    radial-gradient(900px 700px at 110% 10%, #f1ecfb 0%, transparent 55%),
+    linear-gradient(180deg,#f8f7fd 0%, #eee9f8 100%);
+}
+.bg-orbs::before,.bg-orbs::after{
+  content:"";position:absolute;border-radius:50%;
+  filter:blur(80px);opacity:.5;
+  animation:floatOrb 18s ease-in-out infinite;
+}
+.bg-orbs::before{
+  width:520px;height:520px;left:-120px;top:10%;
+  background:radial-gradient(circle,#d8c7f5 0%,transparent 70%);
+}
+.bg-orbs::after{
+  width:600px;height:600px;right:-160px;top:40%;
+  background:radial-gradient(circle,#c8b8ef 0%,transparent 70%);
+  animation-delay:-6s;
+}
+@keyframes floatOrb{
+  0%,100%{transform:translateY(0) translateX(0)}
+  50%{transform:translateY(-40px) translateX(20px)}
+}
+
+/* ============ Glass primitive ============ */
+.glass{
+  background:rgba(255,255,255,.55);
+  backdrop-filter:blur(25px) saturate(160%);
+  -webkit-backdrop-filter:blur(25px) saturate(160%);
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 20px 50px -20px rgba(20,30,60,.18),
+    0 4px 14px -6px rgba(20,30,60,.08);
+  border-radius:24px;
+}
+.glass-dark{
+  background:linear-gradient(180deg,rgba(20,24,34,.85),rgba(20,24,34,.7));
+  backdrop-filter:blur(25px) saturate(160%);
+  -webkit-backdrop-filter:blur(25px) saturate(160%);
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:24px;
+  box-shadow:0 30px 60px -25px rgba(0,0,0,.45);
+}
+
+/* ============ Navigation ============ */
+.nav{
+  position:sticky;top:16px;z-index:50;
+  margin:16px auto 0;max-width:1200px;
+  padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-radius:20px;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.02em;font-size:15px}
+.brand-mark{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,#7c3aed,#a855f7);
+  display:grid;place-items:center;color:#fff;
+  box-shadow:0 8px 18px -8px rgba(124,58,237,.6);
+}
+.brand-mark svg{width:18px;height:18px}
+.nav-links{display:flex;gap:28px;font-size:14px;color:#3b4252}
+.nav-links a{transition:color .2s}
+.nav-links a:hover{color:#0f1115}
+.nav-cta{
+  padding:10px 18px;border-radius:14px;font-size:14px;font-weight:600;
+  background:#0f1115;color:#fff;transition:transform .2s, box-shadow .2s;
+  box-shadow:0 8px 20px -8px rgba(15,17,21,.5);
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 12px 26px -10px rgba(15,17,21,.55)}
+@media(max-width:720px){.nav-links{display:none}}
+
+/* ============ Layout ============ */
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+
+/* ============ Hero ============ */
+.hero{padding:80px 0 40px;text-align:center}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:999px;font-size:13px;color:#3b4252;
+  background:rgba(255,255,255,.7);backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 4px 14px -8px rgba(20,30,60,.15);
+}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
+.hero h1{
+  margin:22px auto 16px;max-width:880px;
+  font-size:clamp(40px,6vw,72px);
+  letter-spacing:-.035em;line-height:1.05;font-weight:700;
+  background:linear-gradient(180deg,#0f1115 0%, #3a4255 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero h1 .grad{
+  background:linear-gradient(135deg,#7c3aed 0%, #a855f7 60%, #6d28d9 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p.sub{max-width:620px;margin:0 auto;color:#525a6b;font-size:18px}
+
+/* URL form */
+.url-form{
+  margin:36px auto 0;max-width:760px;
+  display:flex;gap:10px;align-items:center;
+  padding:10px;border-radius:22px;
+}
+.url-input-wrap{flex:1;display:flex;align-items:center;gap:10px;padding:6px 14px}
+.url-input-wrap svg{flex:none;color:#7a8294}
+.url-input{
+  flex:1;border:none;outline:none;background:transparent;
+  font-size:16px;color:#0f1115;padding:14px 0;min-width:0;
+}
+.url-input::placeholder{color:#9aa3b5}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;justify-content:center;
+  padding:14px 20px;border-radius:16px;font-weight:600;font-size:14px;
+  transition:transform .2s, box-shadow .2s, background .2s;
+  position:relative;overflow:hidden;white-space:nowrap;
+}
+.btn-ghost{background:rgba(255,255,255,.7);color:#0f1115;border:1px solid rgba(0,0,0,.06)}
+.btn-ghost:hover{background:#fff}
+.btn-primary{
+  background:linear-gradient(135deg,#1a0f2e,#6d28d9);color:#fff;
+  box-shadow:0 12px 28px -12px rgba(109,40,217,.55);
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 18px 34px -14px rgba(124,58,237,.6)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* ripple */
+.ripple{position:absolute;border-radius:50%;transform:scale(0);background:rgba(255,255,255,.45);animation:ripple .6s linear;pointer-events:none}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+
+@media(max-width:640px){
+  .url-form{flex-direction:column;align-items:stretch}
+  .btn{width:100%}
+}
+
+/* trust row */
+.trust{
+  margin:28px auto 0;display:flex;gap:24px;justify-content:center;flex-wrap:wrap;
+  color:#6b7385;font-size:13px;
+}
+.trust span{display:inline-flex;align-items:center;gap:6px}
+.trust svg{color:#22c55e}
+
+/* ============ Section heads ============ */
+.section{padding:80px 0}
+.section h2{
+  font-size:clamp(28px,3.6vw,44px);letter-spacing:-.02em;font-weight:700;text-align:center;
+}
+.section .lead{max-width:620px;margin:14px auto 0;text-align:center;color:#525a6b}
+
+/* ============ Video Preview ============ */
+.preview{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;padding:24px;border-radius:28px}
+@media(max-width:880px){.preview{grid-template-columns:1fr}}
+.thumb{
+  position:relative;border-radius:20px;overflow:hidden;aspect-ratio:16/9;
+  background:#0f1115;box-shadow:0 20px 50px -20px rgba(20,30,60,.3);
+}
+.thumb img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.thumb:hover img{transform:scale(1.04)}
+.duration-badge{
+  position:absolute;right:12px;bottom:12px;
+  background:rgba(0,0,0,.7);color:#fff;font-size:12px;
+  padding:6px 10px;border-radius:8px;backdrop-filter:blur(8px);
+}
+.play-glow{
+  position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;
+}
+.play-glow .pulse{
+  width:78px;height:78px;border-radius:50%;
+  background:rgba(255,255,255,.18);backdrop-filter:blur(8px);
+  display:grid;place-items:center;color:#fff;
+  box-shadow:0 0 0 0 rgba(255,255,255,.4);animation:pulseRing 2s infinite;
+}
+@keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(255,255,255,.35)}100%{box-shadow:0 0 0 22px rgba(255,255,255,0)}}
+
+.video-meta h3{font-size:22px;letter-spacing:-.01em;line-height:1.3}
+.channel{display:flex;align-items:center;gap:12px;margin-top:14px}
+.channel .avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#a855f7);
+  display:grid;place-items:center;color:#fff;font-weight:700;
+}
+.channel .name{font-weight:600}
+.channel .verified{color:#7c3aed;display:inline-flex;vertical-align:middle;margin-left:4px}
+.stats{margin-top:16px;display:flex;gap:18px;color:#6b7385;font-size:14px;flex-wrap:wrap}
+.stats span{display:inline-flex;align-items:center;gap:6px}
+
+/* skeleton */
+.skeleton{
+  background:linear-gradient(90deg,#eef1f8 25%,#f6f8fc 37%,#eef1f8 63%);
+  background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;
+}
+@keyframes shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+
+/* ============ Download Options ============ */
+.tabs{display:inline-flex;padding:6px;border-radius:16px;gap:4px;margin:24px auto 28px;justify-content:center;width:fit-content;position:relative;left:50%;transform:translateX(-50%)}
+.tab{padding:10px 18px;border-radius:12px;font-size:14px;font-weight:600;color:#525a6b;transition:.2s}
+.tab.active{background:linear-gradient(135deg,#1a0f2e,#6d28d9);color:#fff;box-shadow:0 8px 20px -8px rgba(109,40,217,.5)}
+.format-grid{
+  display:grid;gap:16px;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+}
+.format-card{
+  padding:20px;border-radius:20px;display:flex;flex-direction:column;gap:14px;
+  transition:transform .3s, box-shadow .3s;
+}
+.format-card:hover{transform:translateY(-4px);box-shadow:0 28px 60px -25px rgba(80,40,160,.22)}
+.format-head{display:flex;align-items:center;justify-content:space-between}
+.quality-badge{
+  font-weight:700;font-size:16px;letter-spacing:-.01em;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.quality-badge svg{color:#7c3aed}
+.tag{
+  font-size:11px;font-weight:600;padding:4px 8px;border-radius:8px;
+  background:rgba(124,58,237,.12);color:#6d28d9;text-transform:uppercase;letter-spacing:.04em;
+}
+.tag.hd{background:rgba(168,85,247,.16);color:#7c3aed}
+.tag.audio{background:rgba(124,58,237,.12);color:#6d28d9}
+.format-meta{display:flex;justify-content:space-between;color:#6b7385;font-size:13px}
+.dl-btn{
+  margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 14px;border-radius:14px;font-weight:600;font-size:14px;
+  background:linear-gradient(135deg,#1a0f2e,#6d28d9);color:#fff;transition:transform .2s, box-shadow .2s;
+  position:relative;overflow:hidden;
+}
+.dl-btn:hover{transform:translateY(-1px);box-shadow:0 14px 26px -10px rgba(109,40,217,.55)}
+
+/* ============ Features ============ */
+.features{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:36px}
+.feature{
+  padding:24px;border-radius:22px;transition:transform .3s;
+}
+.feature:hover{transform:translateY(-4px)}
+.feature .icon{
+  width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#eef2fb,#fff);color:#0f1115;
+  border:1px solid rgba(0,0,0,.05);margin-bottom:14px;
+}
+.feature h3{font-size:17px;letter-spacing:-.01em}
+.feature p{margin-top:6px;color:#6b7385;font-size:14px}
+
+/* ============ FAQ ============ */
+.faq{display:flex;flex-direction:column;gap:12px;max-width:820px;margin:36px auto 0}
+.faq-item{padding:4px 6px;border-radius:18px;overflow:hidden}
+.faq-q{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  padding:18px 18px;font-weight:600;font-size:15.5px;text-align:left;
+}
+.faq-q .chev{transition:transform .3s}
+.faq-item.open .chev{transform:rotate(180deg)}
+.faq-a{
+  max-height:0;overflow:hidden;transition:max-height .35s ease, padding .35s ease;
+  padding:0 18px;color:#525a6b;font-size:14.5px;
+}
+.faq-item.open .faq-a{max-height:240px;padding:0 18px 18px}
+
+/* ============ Footer ============ */
+footer{padding:40px 0 60px}
+.foot{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  padding:22px 26px;border-radius:22px;font-size:14px;color:#525a6b;
+}
+.foot .links{display:flex;gap:22px}
+.foot .links a:hover{color:#0f1115}
+
+/* ============ Download Modal ============ */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(15,17,21,.45);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+  animation:fadeIn .25s ease;
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  width:100%;max-width:440px;padding:32px;text-align:center;
+  animation:popIn .35s cubic-bezier(.2,.9,.3,1.2);
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:none}}
+.modal h3{font-size:20px;letter-spacing:-.01em;color:#fff}
+.modal .sub{color:rgba(255,255,255,.65);font-size:14px;margin-top:6px}
+.progress-ring{position:relative;width:180px;height:180px;margin:24px auto}
+.progress-ring svg{transform:rotate(-90deg)}
+.progress-ring circle{fill:none;stroke-width:10;stroke-linecap:round}
+.progress-ring .track{stroke:rgba(255,255,255,.1)}
+.progress-ring .bar{
+  stroke:url(#grad);
+  stroke-dasharray:471;stroke-dashoffset:471;
+  transition:stroke-dashoffset .3s ease;
+}
+.progress-ring .pct{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-size:34px;font-weight:700;letter-spacing:-.02em;color:#fff;
+}
+.modal-stats{display:flex;justify-content:space-around;color:rgba(255,255,255,.8);font-size:13px;margin:8px 0 22px}
+.modal-stats strong{display:block;color:#fff;font-size:16px;margin-top:2px;font-weight:600}
+.btn-cancel{
+  width:100%;padding:14px;border-radius:14px;font-weight:600;font-size:14px;
+  background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.14);
+  transition:background .2s;
+}
+.btn-cancel:hover{background:rgba(255,255,255,.18)}
+
+/* ============ Reveal on scroll ============ */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease, transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ============ Toast ============ */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  padding:12px 18px;border-radius:14px;font-size:14px;font-weight:500;
+  background:rgba(15,17,21,.9);color:#fff;backdrop-filter:blur(10px);
+  box-shadow:0 20px 40px -15px rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:200;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* hidden helper */
+[hidden]{display:none!important}
+  </style>
+</head>
+<body>
+
+  <div class="bg-orbs" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav class="nav glass" aria-label="Primary">
+    <a href="#top" class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12"/>
+          <path d="M7 10l5 5 5-5"/>
+          <path d="M5 21h14"/>
+        </svg>
+      </span>
+      ZEE DOWNLOAD
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header id="top" class="hero container">
+    <h1 class="reveal">
+      YouTube Videos, <span class="grad">Downloaded.</span>
+    </h1>
+    <p class="sub reveal">
+      Paste a link. Pick a quality. Get your file in seconds — HD video or MP3 audio.
+    </p>
+
+    <div id="hero-form" class="url-form glass reveal" role="search">
+      <div class="url-input-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+        </svg>
+        <input
+          id="urlInput"
+          class="url-input"
+          type="url"
+          placeholder="Paste a YouTube link here..."
+          aria-label="YouTube URL"
+          autocomplete="off"
+        />
+      </div>
+      <button id="pasteBtn" class="btn btn-ghost" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="8" y="2" width="8" height="4" rx="1"/>
+          <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+        </svg>
+        Paste
+      </button>
+      <button id="analyzeBtn" class="btn btn-primary" type="button">
+        Analyze
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M5 12h14"/>
+          <path d="M13 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- PREVIEW (rendered by JS) -->
+  <section id="previewSection" class="container reveal" hidden style="margin-top:40px"></section>
+
+  <!-- DOWNLOAD OPTIONS (rendered by JS) -->
+  <section id="downloadSection" class="section" hidden></section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="section container">
+    <h2 class="reveal">How it works</h2>
+    <div class="features">
+      <div class="feature glass reveal">
+        <div class="icon" style="font-weight:700">01</div>
+        <h3>Paste link</h3>
+        <p>Copy any YouTube URL and paste it into the input above.</p>
+      </div>
+      <div class="feature glass reveal">
+        <div class="icon" style="font-weight:700">02</div>
+        <h3>Pick quality</h3>
+        <p>Choose video (144p–1080p) or MP3 audio (up to 320kbps).</p>
+      </div>
+      <div class="feature glass reveal">
+        <div class="icon" style="font-weight:700">03</div>
+        <h3>Download</h3>
+        <p>Your file is processed and ready in seconds.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="section container">
+    <h2 class="reveal">Features</h2>
+    <div class="features">
+      <div class="feature glass reveal">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/>
+          </svg>
+        </div>
+        <h3>Unlimited downloads</h3>
+        <p>No daily limits, no caps, no accounts.</p>
+      </div>
+      <div class="feature glass reveal">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
+          </svg>
+        </div>
+        <h3>Fast processing</h3>
+        <p>Optimized pipeline returns your file in seconds.</p>
+      </div>
+      <div class="feature glass reveal">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4V8z"/>
+          </svg>
+        </div>
+        <h3>Up to 1080p HD</h3>
+        <p>Full HD video with no quality loss or watermarks.</p>
+      </div>
+      <div class="feature glass reveal">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
+        <h3>MP3 up to 320kbps</h3>
+        <p>Extract clean audio at 128, 192, or 320kbps.</p>
+      </div>
+      <div class="feature glass reveal">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>
+          </svg>
+        </div>
+        <h3>Works on every device</h3>
+        <p>Responsive interface for mobile, tablet and desktop.</p>
+      </div>
+      <div class="feature glass reveal">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/>
+          </svg>
+        </div>
+        <h3>Private by default</h3>
+        <p>Links and files are never stored on our servers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section container">
+    <h2 class="reveal">FAQ</h2>
+    <div class="faq">
+      <div class="faq-item glass reveal">
+        <button class="faq-q" type="button">
+          Is ZEE DOWNLOAD free?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-a">Yes. No paywalls, no hidden limits.</div>
+      </div>
+      <div class="faq-item glass reveal">
+        <button class="faq-q" type="button">
+          Which qualities are supported?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-a">Video from 144p to 1080p Full HD, and MP3 audio at 128, 192, and 320kbps.</div>
+      </div>
+      <div class="faq-item glass reveal">
+        <button class="faq-q" type="button">
+          Do I need to install anything?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-a">No. ZEE DOWNLOAD runs entirely in your browser.</div>
+      </div>
+      <div class="faq-item glass reveal">
+        <button class="faq-q" type="button">
+          Is my data safe?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-a">We don't store links, files, or personal data. Every download is processed and forgotten.</div>
+      </div>
+      <div class="faq-item glass reveal">
+        <button class="faq-q" type="button">
+          Can I download private or age-restricted videos?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-a">No. Only publicly available content is supported.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="container">
+    <div class="foot glass">
+      <div>© <span id="yr"></span> ZEE DOWNLOAD</div>
+      <div class="links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#faq">Support</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DOWNLOAD MODAL -->
+  <div id="progressModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="progressTitle">
+    <div class="modal glass-dark">
+      <h3 id="progressTitle">Preparing your download</h3>
+      <div class="sub" id="progressSub">Just a moment…</div>
+      <div class="progress-ring">
+        <svg width="180" height="180">
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#6d28d9"/>
+            </linearGradient>
+          </defs>
+          <circle class="track" cx="90" cy="90" r="75"/>
+          <circle class="bar" cx="90" cy="90" r="75"/>
+        </svg>
+        <div class="pct" id="progressPct">0%</div>
+      </div>
+      <div class="modal-stats">
+        <div id="progressSpeed">0 MB/s<strong>Speed</strong></div>
+        <div id="progressSize">—<strong>Total</strong></div>
+      </div>
+      <button id="cancelBtn" class="btn-cancel" type="button">Cancel</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+/* ============================================================
+   YouTube Downloader — Vanilla JS
+   NOTE: Real YouTube downloading requires a backend (yt-dlp etc.)
+   due to CORS + ToS. The fetchVideoInfo() function is a clearly
+   marked placeholder you can wire to your own API endpoint.
+   ============================================================ */
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+
+/* ---------- Ripple effect ---------- */
+function attachRipple(el) {
+  el.addEventListener('click', (e) => {
+    const rect = el.getBoundingClientRect();
+    const r = document.createElement('span');
+    const size = Math.max(rect.width, rect.height);
+    r.className = 'ripple';
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    r.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    el.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  });
+}
+$$('.btn, .dl-btn, .nav-cta').forEach(attachRipple);
+
+/* ---------- Toast ---------- */
+const toast = $('#toast');
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+/* ---------- URL helpers ---------- */
+function extractVideoId(url) {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+/* ---------- Paste button ---------- */
+$('#pasteBtn').addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    $('#urlInput').value = text;
+    showToast('Pasted from clipboard');
+  } catch {
+    showToast('Clipboard access denied');
+  }
+});
+
+/* ---------- Sample / placeholder API ---------- */
+async function fetchVideoInfo(videoId) {
+  let title = '';
+  let channel = '';
+  let channelInitial = 'Y';
+
+  try {
+    const res = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && !data.error) {
+        title = data.title || '';
+        channel = data.author_name || '';
+        channelInitial = channel ? channel.charAt(0).toUpperCase() : 'Y';
+      }
+    }
+  } catch (e) {}
+
+  if (!title) title = 'YouTube Video';
+  if (!channel) channel = 'YouTube Channel';
+
+  return {
+    id: videoId,
+    title,
+    channel,
+    channelInitial,
+    verified: false,
+    duration: '—',
+    views: '—',
+    published: '—',
+    thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+    fallbackThumb: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    formats: {
+      video: [
+        { quality: '144p',  ext: 'MP4', size: '8.2 MB',   tag: '' },
+        { quality: '240p',  ext: 'MP4', size: '14.6 MB',  tag: '' },
+        { quality: '360p',  ext: 'MP4', size: '28.4 MB',  tag: '' },
+        { quality: '480p',  ext: 'MP4', size: '48.1 MB',  tag: '' },
+        { quality: '720p',  ext: 'MP4', size: '94.7 MB',  tag: 'HD' },
+        { quality: '1080p', ext: 'MP4', size: '186.3 MB', tag: 'Full HD' },
+      ],
+      audio: [
+        { quality: '128 kbps', ext: 'MP3', size: '11.8 MB' },
+        { quality: '192 kbps', ext: 'MP3', size: '17.6 MB' },
+        { quality: '320 kbps', ext: 'MP3', size: '29.3 MB' },
+      ],
+    },
+  };
+}
+
+/* ---------- Render preview ---------- */
+const previewSection = $('#previewSection');
+const downloadSection = $('#downloadSection');
+
+function renderSkeleton() {
+  previewSection.hidden = false;
+  previewSection.innerHTML = `
+    <div class="thumb skeleton" style="border-radius:20px"></div>
+    <div class="video-meta">
+      <div class="skeleton" style="height:24px;width:90%"></div>
+      <div class="skeleton" style="height:18px;width:60%;margin-top:14px"></div>
+      <div class="skeleton" style="height:18px;width:75%;margin-top:14px"></div>
+      <div class="skeleton" style="height:18px;width:40%;margin-top:14px"></div>
+    </div>`;
+  previewSection.classList.add('preview', 'glass');
+  previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderPreview(info) {
+  previewSection.innerHTML = `
+    <div class="thumb" id="thumbWrap" style="cursor:pointer" title="Click to play">
+      <img id="thumbImg" src="${info.thumbnail}" alt="${info.title}" loading="lazy"
+           onerror="this.onerror=null;this.src='${info.fallbackThumb}'" />
+      <div class="play-glow"><div class="pulse">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </div></div>
+      <div class="duration-badge">${info.duration}</div>
+    </div>
+    <div class="video-meta">
+      <h3>${info.title}</h3>
+      <div class="channel">
+        <div class="avatar">${info.channelInitial}</div>
+        <div>
+          <div class="name">${info.channel}${info.verified ? `
+            <span class="verified" title="Verified">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.5 2.2 3.3-.4.9 3.2 3 1.4-1.1 3.2 1.1 3.2-3 1.4-.9 3.2-3.3-.4L12 22l-2.5-2.2-3.3.4-.9-3.2-3-1.4 1.1-3.2L2.3 9l3-1.4.9-3.2 3.3.4L12 2zm-1 13l6-6-1.4-1.4L11 12.2 8.4 9.6 7 11l4 4z"/></svg>
+            </span>` : ''}
+          </div>
+          <div style="color:#6b7385;font-size:13px;margin-top:2px">${info.published}</div>
+        </div>
+      </div>
+      <div class="stats">
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg> ${info.views} views</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${info.duration}</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Ready</span>
+      </div>
+    </div>`;
+
+  // Thumb click = inline YouTube player
+  document.getElementById('thumbWrap').addEventListener('click', () => {
+    const wrap = document.getElementById('thumbWrap');
+    wrap.innerHTML = `<iframe
+      src="https://www.youtube.com/embed/${info.id}?autoplay=1&rel=0"
+      allow="autoplay; encrypted-media; fullscreen"
+      allowfullscreen
+      style="position:absolute;inset:0;width:100%;height:100%;border:none;border-radius:20px"
+    ></iframe>`;
+    wrap.style.cursor = 'default';
+  });
+}
+
+function renderFormats(info) {
+  downloadSection.hidden = false;
+  const videoCards = info.formats.video.map(f => formatCard(f, 'video')).join('');
+  const audioCards = info.formats.audio.map(f => formatCard(f, 'audio')).join('');
+  downloadSection.innerHTML = `
+    <div class="container">
+      <h2>Choose Your Download</h2>
+      <p class="lead">Pick the perfect quality and format. All downloads are processed at lightning speed.</p>
+      <div class="tabs glass" role="tablist">
+        <button class="tab active" data-tab="video">Video</button>
+        <button class="tab" data-tab="audio">Audio</button>
+      </div>
+      <div id="videoGrid" class="format-grid">${videoCards}</div>
+      <div id="audioGrid" class="format-grid" hidden>${audioCards}</div>
+    </div>`;
+
+  // tab switching
+  $$('.tab', downloadSection).forEach(t => {
+    t.addEventListener('click', () => {
+      $$('.tab', downloadSection).forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const isVideo = t.dataset.tab === 'video';
+      $('#videoGrid').hidden = !isVideo;
+      $('#audioGrid').hidden = isVideo;
+    });
+  });
+
+  // download buttons
+  $$('.dl-btn', downloadSection).forEach(btn => {
+    attachRipple(btn);
+    btn.addEventListener('click', () => startDownload(btn.dataset));
+  });
+
+  // reveal animation
+  $$('.format-card', downloadSection).forEach((el, i) => {
+    el.style.transitionDelay = (i * 40) + 'ms';
+    el.classList.add('reveal');
+    requestAnimationFrame(() => el.classList.add('in'));
+  });
+}
+
+function formatCard(f, kind) {
+  const tag = kind === 'audio'
+    ? `<span class="tag audio">MP3</span>`
+    : (f.tag ? `<span class="tag ${/HD/.test(f.tag) ? 'hd' : ''}">${f.tag}</span>` : '');
+  const icon = kind === 'audio'
+    ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`
+    : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4V8z"/></svg>`;
+  return `
+    <div class="format-card glass">
+      <div class="format-head">
+        <div class="quality-badge">${icon}${f.quality}</div>
+        ${tag}
+      </div>
+      <div class="format-meta">
+        <span>${f.ext}</span>
+        <span>${f.size}</span>
+      </div>
+      <button class="dl-btn" data-quality="${f.quality}" data-ext="${f.ext}" data-size="${f.size}">
+        Download
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+      </button>
+    </div>`;
+}
+
+/* ---------- Analyze flow ---------- */
+async function analyze() {
+  const url = $('#urlInput').value.trim();
+  const id = extractVideoId(url);
+  if (!id) {
+    showToast('Please enter a valid YouTube URL');
+    $('#urlInput').focus();
+    return;
+  }
+  const btn = $('#analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<span style="width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite"></span> Analyzing...`;
+  renderSkeleton();
+  try {
+    const info = await fetchVideoInfo(id);
+    renderPreview(info);
+    renderFormats(info);
+    showToast('Video ready');
+  } catch (e) {
+    showToast('Could not fetch video info');
+    previewSection.hidden = true;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `Analyze Video
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>`;
+  }
+}
+
+$('#analyzeBtn').addEventListener('click', analyze);
+$('#urlInput').addEventListener('keydown', e => { if (e.key === 'Enter') analyze(); });
+
+/* ---------- Download progress modal ---------- */
+const modal = $('#progressModal');
+const ring = $('.progress-ring .bar');
+const pctEl = $('#progressPct');
+const speedEl = $('#progressSpeed');
+const sizeEl = $('#progressSize');
+const titleEl = $('#progressTitle');
+const subEl = $('#progressSub');
+const CIRC = 471; // 2 * pi * 75
+
+let dlTimer = null;
+function startDownload({ quality, ext, size }) {
+  titleEl.textContent = `Downloading ${quality}`;
+  subEl.textContent = `${ext} • ${size}`;
+  sizeEl.innerHTML = `${size}<strong>Total</strong>`;
+  modal.classList.add('show');
+  let p = 0;
+  setRing(0);
+  pctEl.textContent = '0%';
+  dlTimer = setInterval(() => {
+    p += Math.random() * 6 + 2;
+    if (p >= 100) { p = 100; clearInterval(dlTimer); dlTimer = null;
+      setTimeout(() => { modal.classList.remove('show'); showToast(`${quality} ${ext} ready`); }, 600);
+    }
+    setRing(p);
+    pctEl.textContent = Math.floor(p) + '%';
+    const speed = (2 + Math.random() * 6).toFixed(1);
+    speedEl.innerHTML = `${speed} MB/s<strong>Speed</strong>`;
+  }, 220);
+}
+function setRing(p) {
+  ring.style.strokeDashoffset = CIRC - (CIRC * p / 100);
+}
+$('#cancelBtn').addEventListener('click', () => {
+  if (dlTimer) clearInterval(dlTimer);
+  modal.classList.remove('show');
+  showToast('Download cancelled');
+});
+
+/* ---------- FAQ accordion ---------- */
+$$('.faq-item').forEach(item => {
+  item.querySelector('.faq-q').addEventListener('click', () => {
+    item.classList.toggle('open');
+  });
+});
+
+/* ---------- Reveal on scroll ---------- */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
+}, { threshold: 0.12 });
+$$('.reveal').forEach(el => io.observe(el));
+
+/* ---------- Smooth scroll for nav ---------- */
+$$('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', (e) => {
+    const id = a.getAttribute('href');
+    if (id.length > 1) {
+      const el = $(id);
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }
+  });
+});
+
+/* ---------- Spinner keyframe ---------- */
+const style = document.createElement('style');
+style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+  </script>
+</body>
+</html>
